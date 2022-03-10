@@ -22,8 +22,8 @@
 
 
 # for debug
-DEBUG_MAKEFILE ?=
-ifeq ($(DEBUG_MAKEFILE),1)
+DEBUG ?=
+ifeq ($(DEBUG),1)
     $(warning *************** debug mode ***************)
 else
     # If we're not debugging the Makefile, don't echo recipes.
@@ -76,15 +76,13 @@ format: # @HELP gofmt (reformat) package sources
 
 help: # @HELP prints this message
 help:
-	@echo "VARIABLES:"
-	echo "  BIN = $(BIN)"
-	echo "  OS = $(OS)"
-	echo "  ARCH = $(ARCH)"
-	echo "  GOFLAGS = $(GOFLAGS)"
-	echo
 	echo "TARGETS:"
 	grep -E '^.*: *# *@HELP' $(MAKEFILE_LIST)     \
 	    | awk '                                   \
 	        BEGIN {FS = ": *# *@HELP"};           \
 	        { printf "  %-30s %s\n", $$1, $$2 };  \
 		'
+	echo
+	@echo "INFOS:"
+	echo "  current platform: $(OS)/$(ARCH)"
+	echo "  all support platforms: $(ALL_PLATFORMS)"
