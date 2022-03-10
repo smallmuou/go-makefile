@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+VERSION = 1.0
+
 ifneq ($(wildcard .git),)
 VERSION ?= $(shell git describe --tags --always --dirty)
-else
-VERSION ?= 1.0.0
 endif
 
 all:
