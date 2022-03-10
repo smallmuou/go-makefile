@@ -6,9 +6,9 @@ Makefile template for build golang apps.
 
 #### Quick Start
 
-Copy Makefile to you golang app top directory, and type `make`.
+Copy Makefile to you golang app top directory, and type `make`. If you want to debug, type `DEBUG=1 make`.
 
-if you want to debug, type `DEBUG=1 make`
+The binaries will be generate under the directory: ./bin/
 
 #### Usages
 
