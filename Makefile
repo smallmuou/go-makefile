@@ -20,11 +20,71 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-VERSION = 1.0
 
-ifneq ($(wildcard .git),)
-VERSION ?= $(shell git describe --tags --always --dirty)
+# for debug
+DEBUG_MAKEFILE ?=
+ifeq ($(DEBUG_MAKEFILE),1)
+    $(warning *************** debug mode ***************)
+else
+    # If we're not debugging the Makefile, don't echo recipes.
+    MAKEFLAGS += -s
 endif
 
-all:
-	@echo =====$(VERSION)
+# Go
+GO := go
+GOFLAGS :=
+
+# The binaries to build (just the basenames)
+BIN := hello
+
+# The all platforms we support.
+ALL_PLATFORMS := linux/amd64 linux/arm linux/arm64 darwin/amd64 windows/386 windows/amd64
+
+# The current platform
+OS := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
+ARCH := $(if $(GOARCH),$(GOARCH),$(shell go env GOARCH))
+
+all: # @HELP builds binaries for current platform
+all: build
+
+# For the following OS/ARCH expansions, we transform OS/ARCH into OS_ARCH
+build-%:
+	echo "# building for $(firstword $(subst _, ,$*))/$(lastword $(subst _, ,$*)) ..."
+	mkdir -p bin/$(firstword $(subst _, ,$*))_$(lastword $(subst _, ,$*))
+	cd bin/$(firstword $(subst _, ,$*))_$(lastword $(subst _, ,$*)); \
+	CGO_ENABLE=0 GOOS=$(firstword $(subst _, ,$*)) GOARCH=$(lastword $(subst _, ,$*)) \
+	$(GO) build ../../
+	echo "output to bin/$(firstword $(subst _, ,$*))_$(lastword $(subst _, ,$*))"
+
+all-build: # @HELP builds binaries for all platforms
+all-build: format $(addprefix build-, $(subst /,_, $(ALL_PLATFORMS)))
+
+build: # @HELP builds binaries for current platform
+build: format build-$(OS)_$(ARCH)
+	echo
+
+clean: # @HELP removes built binaries and temporary files
+clean:
+	echo "remove bin/ ..."
+	rm -rf bin
+
+check: # @HELP report likely mistakes in packages
+	$(GO) vet
+
+format: # @HELP gofmt (reformat) package sources
+	$(GO) fmt
+
+help: # @HELP prints this message
+help:
+	@echo "VARIABLES:"
+	echo "  BIN = $(BIN)"
+	echo "  OS = $(OS)"
+	echo "  ARCH = $(ARCH)"
+	echo "  GOFLAGS = $(GOFLAGS)"
+	echo
+	echo "TARGETS:"
+	grep -E '^.*: *# *@HELP' $(MAKEFILE_LIST)     \
+	    | awk '                                   \
+	        BEGIN {FS = ": *# *@HELP"};           \
+	        { printf "  %-30s %s\n", $$1, $$2 };  \
+		'
