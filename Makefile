@@ -44,8 +44,7 @@ ALL_PLATFORMS := linux/amd64 linux/arm linux/arm64 darwin/amd64 windows/386 wind
 OS := $(if $(GOOS),$(GOOS),$(shell go env GOOS))
 ARCH := $(if $(GOARCH),$(GOARCH),$(shell go env GOARCH))
 
-all: # @HELP builds binaries for current platform
-all: build
+all: help
 
 # For the following OS/ARCH expansions, we transform OS/ARCH into OS_ARCH
 build-%:
